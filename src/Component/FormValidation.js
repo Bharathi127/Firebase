@@ -2,44 +2,27 @@ import React, { useState } from 'react'
 import { useRef } from 'react'
 import { signInValidation,signUpValidation } from './Validate'
 import { useNavigate } from 'react-router-dom'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import {  createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from './Firebase';
 const FormValidation = () => {
     const [show, setShow] = useState(false)
     const navigate = useNavigate()
-    const nameref = useRef('')
-    const passref = useRef('')
-    const emailref = useRef('')
+    const nameref = useRef(null)
+    const passref = useRef(null)
+    const emailref = useRef(null)
     const [message, setMessage] = useState()
-    console.log(nameref)
-    const validation = (e) => {
+   const validation = (e) => {
         e.preventDefault()
 
         if (show) {
-            const mess = signUpValidation(nameref.current.value, passref.current.value, emailref.current.value)
-            if (mess) {
-                setMessage(mess)
-            }
-            else {
-                navigate('/home')}
-
-        }
-        else {
-            const mess = signInValidation(nameref.current.value, passref.current.value)
-
-            if (mess) {
-                setMessage(mess)
-            }
-            else {
-                navigate('/home')
-            }    }
-        if (show) {
-            const auth = getAuth();
+         
             console.log("Inside of signup")
-            createUserWithEmailAndPassword(auth, nameref.current.value, passref.current.value, emailref.current.value)
+            createUserWithEmailAndPassword(auth,emailref.current.value,passref.current.value)
                 .then((userCredential) => {
                  
                     const user = userCredential.user;
                     console.log(user)
+                    navigate('/home')
                     
                 })
                 .catch((error) => {
@@ -52,13 +35,14 @@ const FormValidation = () => {
 
         }
         else{
-            const auth = getAuth();
+         
             console.log("Inside of signIn")
-            signInWithEmailAndPassword(auth, nameref.current.value, passref.current.value)
+            signInWithEmailAndPassword(auth, emailref.current.value, passref.current.value)
                 .then((userCredential) => {
                     // Signed in 
                     const user = userCredential.user;
                     console.log(user)
+                    navigate('/home')
                     // ...
                 })
                 .catch((error) => {
@@ -67,19 +51,18 @@ const FormValidation = () => {
                     console.log(errorMessage)
                     setMessage(errorMessage)
                 });
-
+            }
         }
-
-    }
 
     return (
         <div>
 
             <form className='login'>
                 <h2>Authentication</h2>
-                <input type="text" placeholder='Username' style={{ width: "220px" }} ref={nameref} />
+                {show && <input type="text" placeholder='Username' style={{ width: "220px" }} ref={nameref} />}
+                <input type="text" placeholder='email' style={{ width: "220px" }} ref={emailref} />
                 <input type="password" placeholder='password' style={{ width: "220px" }} ref={passref} />
-                {show && <input type="text" placeholder='email' style={{ width: "220px" }} ref={emailref} />}
+                
 
                 <h2 style={{ color: 'red' }}>{message}</h2>
                 <button onClick={validation}>Login</button>
